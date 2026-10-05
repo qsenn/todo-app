@@ -33,16 +33,9 @@ export function githubConfig(): GithubConfig {
   };
 }
 
-/**
- * Public origin of this app, used for the OAuth callback and every post-login/logout redirect.
- * Production requires APP_URL so redirects never follow a client-supplied Host header.
- */
+/** Public origin of this app: APP_URL when set (so the callback URL matches the OAuth App), else the request's. */
 export function appOrigin(request: NextRequest): string {
-  const configured = process.env.APP_URL;
-  if (!configured && process.env.NODE_ENV === "production") {
-    throw new OAuthConfigError("운영 환경에서는 APP_URL 환경 변수가 필요합니다 (docs/GITHUB_OAUTH.md 참고).");
-  }
-  return (configured || request.nextUrl.origin).replace(/\/+$/, "");
+  return (process.env.APP_URL || request.nextUrl.origin).replace(/\/+$/, "");
 }
 
 export const newState = () => randomBytes(16).toString("base64url");

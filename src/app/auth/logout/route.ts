@@ -1,16 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { deleteSession, SESSION_COOKIE } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { appOrigin, configErrorResponse } from "@/lib/githubOAuth";
+import { appOrigin } from "@/lib/githubOAuth";
 
 /** Deletes the session record and expires the cookie; 303 turns the form POST into a GET of /login. */
 export async function POST(request: NextRequest) {
-  let origin;
-  try {
-    origin = appOrigin(request);
-  } catch (error) {
-    return configErrorResponse(error);
-  }
+  const origin = appOrigin(request);
   // Browsers send Origin on form POSTs; refuse cross-site ones so other sites cannot log users out.
   const from = request.headers.get("origin");
   if (from && from !== origin) return new Response("Cross-origin logout is not allowed.", { status: 403 });

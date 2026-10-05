@@ -82,18 +82,8 @@ describe("GET /auth/github", () => {
     expect((await callback.GET(req("/auth/github/callback?code=x&state=y"))).status).toBe(500);
   });
 
-  it("requires APP_URL in production instead of trusting the Host header", async () => {
+  it("uses the request origin when APP_URL is unset, in production too", async () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("APP_URL", "");
-    const evil = new NextRequest(new URL("/auth/github", "https://evil.example"));
-    const response = await start.GET(evil);
-    expect(response.status).toBe(500);
-    expect(await response.text()).toContain("APP_URL");
-    expect((await callback.GET(new NextRequest(new URL("/auth/github/callback?code=x&state=y", "https://evil.example")))).status).toBe(500);
-    expect((await logout.POST(new NextRequest(new URL("/auth/logout", "https://evil.example"), { method: "POST" }))).status).toBe(500);
-  });
-
-  it("uses the request origin in development when APP_URL is unset", async () => {
     vi.stubEnv("APP_URL", "");
     const response = await start.GET(new NextRequest(new URL("/auth/github", "http://dev.local:4000")));
     expect(new URL(response.headers.get("location")!).searchParams.get("redirect_uri")).toBe(

@@ -30,7 +30,7 @@ cp .env.local.example .env.local
 | `MONGODB_URI` | MongoDB 접속 주소 |
 | `GITHUB_CLIENT_ID` | OAuth App의 Client ID |
 | `GITHUB_CLIENT_SECRET` | OAuth App의 Client secret. **절대 커밋하지 마세요.** `.env*` 파일은 `.gitignore`로 제외됩니다(예시 파일만 예외) |
-| `APP_URL` | 이 앱의 공개 주소(예: `http://localhost:3000`). OAuth App에 등록한 콜백 URL과 맞아야 합니다. **운영 환경(`NODE_ENV=production`)에서는 필수**이며, 없으면 로그인·로그아웃이 설정 안내와 함께 500을 반환합니다. 개발 중에 비우면 요청이 들어온 주소를 씁니다 |
+| `APP_URL` | 이 앱의 공개 주소(예: `http://localhost:3000`). OAuth App에 등록한 콜백 URL과 맞아야 합니다. 선택 항목이며, 비우면 요청이 들어온 주소를 씁니다 |
 
 두 GitHub 값 중 하나라도 없으면 `/auth/github`가 설정 안내 메시지와 함께 500을 반환합니다. client secret은 코드에 넣지 않고 환경 변수로만 읽습니다.
 
@@ -53,7 +53,7 @@ npm run migrate:user-id -- --confirm=<DB 이름>  # 실제 삭제 (되돌릴 수
 | --- | --- |
 | `GET /auth/github` | 무작위 `state`를 httpOnly 쿠키에 저장하고 GitHub 인증 화면으로 보냅니다 (scope: `read:user`) |
 | `GET /auth/github/callback` | `state`를 확인하고 `code`를 토큰으로 교환한 뒤, GitHub 사용자(`login`, `avatar_url`)를 DB에 저장(재로그인 시 갱신)하고 세션을 시작합니다. 이 브라우저에 이전 세션이 있으면 지우고 새로 만듭니다. GitHub access token은 저장하지 않습니다 |
-| `POST /auth/logout` | DB의 세션 문서를 삭제하고 쿠키를 만료시킨 뒤 `/login`으로 보냅니다. 다른 사이트에서 보낸 요청(`Origin`이 `APP_URL`과 다름)은 403. 그래서 `APP_URL`과 다른 주소(예: `localhost` 대신 `127.0.0.1`)로 접속하면 로그아웃이 거부되니 `APP_URL`과 같은 주소로 접속하세요 |
+| `POST /auth/logout` | DB의 세션 문서를 삭제하고 쿠키를 만료시킨 뒤 `/login`으로 보냅니다. 다른 사이트에서 보낸 요청(`Origin`이 앱 주소와 다름)은 403. `APP_URL`을 설정했다면 그 주소와 다른 주소(예: `localhost` 대신 `127.0.0.1`)로 접속했을 때 로그아웃이 거부되니 같은 주소로 접속하세요 |
 | `GET /api/me` | 로그인한 사용자의 `username`, `avatarUrl` |
 
 - **세션**: 쿠키(`kgt_session`, httpOnly, SameSite=Lax, 운영 환경에서는 Secure)에는 무작위 토큰이 들어가고, DB에는 그 토큰의 SHA-256 해시만 저장합니다. 유효 기간은 30일이며, 만료된 세션은 MongoDB TTL 인덱스가 자동으로 지웁니다.
