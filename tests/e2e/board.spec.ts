@@ -1,17 +1,10 @@
-import { expect, test } from "@playwright/test";
-import { card, closeDatabase, column, dragTo, findTodoStatus, openBoard, resetDatabase, seed } from "./helpers";
+import { expect, test } from "./fixtures";
+import { card, column, dragTo, findTodoStatus, openBoard, seed } from "./helpers";
 
 const MONDAY = "2026-10-05";
 
-test.beforeEach(async () => {
-  await resetDatabase();
-});
 
-test.afterAll(async () => {
-  await closeDatabase();
-});
-
-test("E1: goal → weekly plan → todo created in the UI shows up in the todo column", async ({ page }) => {
+test("E1: goal → weekly plan → todo created in the UI shows up in the todo column", { tag: "@smoke" }, async ({ page }) => {
   await page.goto("/goals");
   const goalForm = page.getByRole("form", { name: "만들기" });
   await goalForm.getByLabel("연도").fill("2026");
@@ -41,7 +34,7 @@ test("E1: goal → weekly plan → todo created in the UI shows up in the todo c
   await expect(created).toContainText("10월 1주");
 });
 
-test("E2: dragging todo → done persists and updates weekly progress", async ({ page, request }) => {
+test("E2: dragging todo → done persists and updates weekly progress", { tag: "@smoke" }, async ({ page, request }) => {
   const plan = await seed.plan(request, { title: "진행률 주", weekStart: MONDAY });
   await seed.todo(request, { title: "보고서 쓰기", date: MONDAY, weeklyPlanId: plan.id });
   await seed.todo(request, { title: "메일 정리", date: MONDAY, weeklyPlanId: plan.id });
@@ -62,7 +55,7 @@ test("E2: dragging todo → done persists and updates weekly progress", async ({
   await expect(item.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "50");
 });
 
-test("E3: a failed status change rolls the card back and shows an error toast", async ({ page, request }) => {
+test("E3: a failed status change rolls the card back and shows an error toast", async ({ user, page, request }) => {
   await seed.todo(request, { title: "실패할 카드", date: MONDAY });
   await page.route("**/api/todos/*", (route) =>
     route.request().method() === "PATCH"
@@ -75,10 +68,10 @@ test("E3: a failed status change rolls the card back and shows an error toast", 
   await expect(page.getByRole("alert").filter({ hasText: "상태를 바꾸지 못했습니다" })).toBeVisible();
   await expect(card(column(page, "todo"), "실패할 카드")).toBeVisible();
   await expect(card(column(page, "doing"), "실패할 카드")).toHaveCount(0);
-  expect(await findTodoStatus("실패할 카드")).toBe("todo");
+  expect(await findTodoStatus("실패할 카드", user.username)).toBe("todo");
 });
 
-test("E6: rapid drags on one card are sent in order and the last state wins", async ({ page, request }) => {
+test("E6: rapid drags on one card are sent in order and the last state wins", async ({ user, page, request }) => {
   await seed.todo(request, { title: "빠른 카드", date: MONDAY });
   const log: { n: number; event: "start" | "end"; at: number; status?: string }[] = [];
   let count = 0;
@@ -86,7 +79,7 @@ test("E6: rapid drags on one card are sent in order and the last state wins", as
     if (route.request().method() !== "PATCH") return route.continue();
     const n = ++count;
     log.push({ n, event: "start", at: Date.now(), status: route.request().postDataJSON().status });
-    if (n === 1) await new Promise((resolve) => setTimeout(resolve, 1_500));
+    if (n === 1) await new Promise((resolve) => setTimeout(resolve, 800));
     const response = await route.fetch();
     log.push({ n, event: "end", at: Date.now() });
     await route.fulfill({ response });
@@ -109,10 +102,10 @@ test("E6: rapid drags on one card are sent in order and the last state wins", as
   await page.reload();
   await page.locator("#board-date").fill(MONDAY);
   await expect(card(column(page, "done"), "빠른 카드")).toBeVisible();
-  expect(await findTodoStatus("빠른 카드")).toBe("done");
+  expect(await findTodoStatus("빠른 카드", user.username)).toBe("done");
 });
 
-test("keyboard: Space, Arrow Right, Space moves a card to the next column", async ({ page, request }) => {
+test("keyboard: Space, Arrow Right, Space moves a card to the next column", async ({ user, page, request }) => {
   await seed.todo(request, { title: "키보드 카드", date: MONDAY });
   await openBoard(page, MONDAY);
 
@@ -126,7 +119,7 @@ test("keyboard: Space, Arrow Right, Space moves a card to the next column", asyn
   await page.keyboard.press("Space");
   await expect(card(column(page, "doing"), "키보드 카드")).toBeVisible();
   await saved;
-  expect(await findTodoStatus("키보드 카드")).toBe("doing");
+  expect(await findTodoStatus("키보드 카드", user.username)).toBe("doing");
 });
 
 test("board CRUD: edit and delete a todo, filter by plan", async ({ page, request }) => {
@@ -179,9 +172,9 @@ test.describe("status rollback with queued drops", () => {
     return done;
   }
 
-  test("first request fails while a second is queued: the second wins", async ({ page, request }) => {
+  test("first request fails while a second is queued: the second wins", async ({ user, page, request }) => {
     await seed.todo(request, { title: "큐 카드", date: MONDAY });
-    const done = await routePatches(page, (n) => (n === 1 ? { delay: 1_000, fail: true } : {}));
+    const done = await routePatches(page, (n) => (n === 1 ? { delay: 600, fail: true } : {}));
     await openBoard(page, MONDAY);
 
     await dragTo(page, card(page, "큐 카드"), column(page, "doing"));
@@ -190,12 +183,12 @@ test.describe("status rollback with queued drops", () => {
     await expect(page.getByRole("alert").filter({ hasText: "상태를 바꾸지 못했습니다" })).toBeVisible();
     await expect.poll(() => done.length).toBe(2);
     await expect(card(column(page, "done"), "큐 카드")).toBeVisible();
-    expect(await findTodoStatus("큐 카드")).toBe("done");
+    expect(await findTodoStatus("큐 카드", user.username)).toBe("done");
   });
 
-  test("second request fails after the first succeeded: the card shows the first result", async ({ page, request }) => {
+  test("second request fails after the first succeeded: the card shows the first result", async ({ user, page, request }) => {
     await seed.todo(request, { title: "반쪽 카드", date: MONDAY });
-    const done = await routePatches(page, (n) => (n === 1 ? { delay: 800 } : { fail: true }));
+    const done = await routePatches(page, (n) => (n === 1 ? { delay: 600 } : { fail: true }));
     await openBoard(page, MONDAY);
 
     await dragTo(page, card(page, "반쪽 카드"), column(page, "doing"));
@@ -204,10 +197,10 @@ test.describe("status rollback with queued drops", () => {
     await expect.poll(() => done.length).toBe(2);
     await expect(card(column(page, "doing"), "반쪽 카드")).toBeVisible();
     await expect(card(column(page, "done"), "반쪽 카드")).toHaveCount(0);
-    expect(await findTodoStatus("반쪽 카드")).toBe("doing");
+    expect(await findTodoStatus("반쪽 카드", user.username)).toBe("doing");
   });
 
-  test("a failure on one card does not undo another card's move", async ({ page, request }) => {
+  test("a failure on one card does not undo another card's move", async ({ user, page, request }) => {
     await seed.todo(request, { title: "실패 카드", date: MONDAY });
     await seed.todo(request, { title: "성공 카드", date: MONDAY });
     let release!: () => void;
@@ -219,7 +212,7 @@ test.describe("status rollback with queued drops", () => {
         return route.fulfill({ status: 500, json: { error: { code: "INTERNAL", message: "서버 오류" } } });
       }
       // The other card's request is held too, so it is still pending when the first one fails.
-      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
       await route.fulfill({ response: await route.fetch() });
     });
     await openBoard(page, MONDAY);
@@ -232,7 +225,7 @@ test.describe("status rollback with queued drops", () => {
     await expect(page.getByRole("alert").filter({ hasText: "상태를 바꾸지 못했습니다" })).toBeVisible();
     await expect(card(column(page, "todo"), "실패 카드")).toBeVisible();
     await expect(card(column(page, "done"), "성공 카드")).toBeVisible({ timeout: 500 });
-    await expect.poll(() => findTodoStatus("성공 카드")).toBe("done");
+    await expect.poll(() => findTodoStatus("성공 카드", user.username)).toBe("done");
     await expect(card(column(page, "done"), "성공 카드")).toBeVisible();
   });
 });

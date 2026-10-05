@@ -1,4 +1,5 @@
 import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { createHash, randomBytes } from "node:crypto";
 import mongoose from "mongoose";
 
 export const E2E_MONGO_URI = `mongodb://127.0.0.1:${process.env.E2E_MONGO_PORT ?? 27999}/kgt-e2e`;
@@ -10,18 +11,39 @@ async function db() {
   return connection.db!;
 }
 
-/** Clears app data but keeps users and sessions, so the shared login stays valid. */
-export async function resetDatabase() {
-  const collections = await (await db()).collections();
-  await Promise.all(
-    collections
-      .filter((c) => !["users", "sessions"].includes(c.collectionName))
-      .map((c) => c.deleteMany({})),
-  );
+/**
+ * A fresh user with a live session, created directly in the database (same format as src/lib/auth.ts).
+ * Every test gets its own user, so tests never see each other's data and can run in parallel.
+ */
+export async function createTestUser(username: string) {
+  const conn = await db();
+  const now = new Date();
+  const { insertedId } = await conn.collection("users").insertOne({
+    githubId: Math.floor(Math.random() * 2 ** 31),
+    username,
+    avatarUrl: "",
+    createdAt: now,
+    updatedAt: now,
+  });
+  const token = randomBytes(32).toString("base64url");
+  await conn.collection("sessions").insertOne({
+    tokenHash: createHash("sha256").update(token).digest("hex"),
+    userId: insertedId,
+    expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+    createdAt: now,
+    updatedAt: now,
+  });
+  return { id: String(insertedId), username, token };
 }
 
-export async function countSessions() {
-  return (await db()).collection("sessions").countDocuments();
+async function userIdOf(username: string) {
+  const user = await (await db()).collection("users").findOne({ username });
+  if (!user) throw new Error(`no user ${username}`);
+  return user._id;
+}
+
+export async function countSessionsOf(username: string) {
+  return (await db()).collection("sessions").countDocuments({ userId: await userIdOf(username) });
 }
 
 const FAKE_GITHUB = `http://127.0.0.1:${process.env.E2E_GITHUB_PORT ?? 3199}`;
@@ -36,13 +58,11 @@ export async function loginWithGithub(page: Page, login: string) {
 
 /** Deletes every session of one user (the session ended, e.g. logout elsewhere). */
 export async function endSessionsOf(username: string) {
-  const conn = await db();
-  const user = await conn.collection("users").findOne({ username });
-  if (user) await conn.collection("sessions").deleteMany({ userId: user._id });
+  await (await db()).collection("sessions").deleteMany({ userId: await userIdOf(username) });
 }
 
-export async function findTodoStatus(title: string) {
-  const doc = await (await db()).collection("todos").findOne({ title });
+export async function findTodoStatus(title: string, ownerUsername: string) {
+  const doc = await (await db()).collection("todos").findOne({ title, userId: await userIdOf(ownerUsername) });
   return doc?.status as string | undefined;
 }
 

@@ -1,15 +1,8 @@
-import { expect, test } from "@playwright/test";
-import { closeDatabase, resetDatabase, seed } from "./helpers";
+import { expect, test } from "./fixtures";
+import { seed } from "./helpers";
 
 const MONDAY = "2026-10-05";
 
-test.beforeEach(async () => {
-  await resetDatabase();
-});
-
-test.afterAll(async () => {
-  await closeDatabase();
-});
 
 test("E4: deleting a weekly plan with todos shows counts and 'unlink' keeps the todos", async ({ page, request }) => {
   const plan = await seed.plan(request, { title: "지울 계획", weekStart: MONDAY });

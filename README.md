@@ -18,6 +18,6 @@ npm run dev
 
 GitHub 계정으로 로그인해야 쓸 수 있고, 각자 자기 데이터만 보입니다. GitHub OAuth App 만들기와 환경 변수, 기존 데이터 마이그레이션은 [`docs/GITHUB_OAUTH.md`](docs/GITHUB_OAUTH.md)를 보세요.
 
-테스트: `npm test`(단위·통합), `npm run test:e2e`(E2E, 처음에 `npx playwright install chromium` 필요). 두 테스트 모두 메모리 MongoDB를 쓰므로 DB를 따로 띄울 필요가 없습니다.
+테스트: `npm test`(단위·통합), `npm run test:e2e`(핵심 E2E만, 빠름), `npm run test:e2e:full`(전체 E2E, 커밋·배포 전). E2E는 처음에 `npx playwright install chromium`이 필요합니다. 두 테스트 모두 메모리 MongoDB를 쓰므로 DB를 따로 띄울 필요가 없습니다.
 
 개발 규칙과 구조는 [`docs/CLAUDE.md`](docs/CLAUDE.md), 요구 사항은 [`docs/PRD.md`](docs/PRD.md), 설계는 [`docs/PLAN.md`](docs/PLAN.md)를 보세요.

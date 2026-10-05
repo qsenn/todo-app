@@ -49,4 +49,3 @@ next-env.d.ts
 # omc runtime state (project skills stay committable)
 /.omc/*
 !/.omc/skills/
-/tests/e2e/.auth/

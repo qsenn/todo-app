@@ -18,11 +18,12 @@ npm run dev                         # http://localhost:3000
 | --- | --- |
 | `npm run lint` | ESLint |
 | `npm run build` | 프로덕션 빌드 (타입 검사 포함) |
-| `npm test` | vitest 단위·통합 테스트. MongoDB 불필요 (`mongodb-memory-server`가 메모리 레플리카셋을 띄움) |
-| `npm run test:e2e` | Playwright E2E. `scripts/e2e-server.mjs`가 메모리 Mongo(포트 27999), 가짜 GitHub(`scripts/fake-github.mjs`, 포트 3199), `next dev`(포트 3100, `distDir=.next-e2e`)를 띄움. `auth.setup.ts`가 한 번 로그인해 세션을 공유 |
+| `npm test` | vitest 단위·통합 테스트. MongoDB 불필요 (`mongodb-memory-server` 단일 서버, 워커별 DB, 인덱스는 모델별로 한 번만 생성) |
+| `npm run test:e2e` | 빠른 E2E: `@smoke` 태그가 붙은 핵심 흐름 5개만 실행(약 12초). 평소 확인용 |
+| `npm run test:e2e:full` | 전체 E2E(병렬 6 워커, 약 30초). **커밋·배포 전에는 반드시 실행**. `scripts/e2e-server.mjs`가 메모리 Mongo(포트 27999), 가짜 GitHub(`scripts/fake-github.mjs`, 포트 3199), `next dev`(포트 3100, `distDir=.next-e2e`)를 띄움. 각 테스트는 `tests/e2e/fixtures.ts`의 `test`로 자기만의 새 사용자(DB에 직접 만든 세션)로 실행되므로 DB 초기화 없이 병렬로 돈다. 실제 GitHub 로그인 흐름은 `auth.spec.ts`가 한 워커에서 순서대로 검증 |
 | `npm run migrate:user-id` | `userId` 없는 기존 데이터 미리 보기. `-- --confirm=<DB 이름>`이면 삭제(되돌릴 수 없음) |
 
-E2E를 처음 실행할 때는 `npx playwright install chromium`이 필요합니다.
+E2E를 처음 실행할 때는 `npx playwright install chromium`이 필요합니다. 새 핵심 흐름 테스트에는 `{ tag: "@smoke" }`를 붙이면 빠른 세트에 들어갑니다.
 
 ## 구조
 
@@ -58,7 +59,7 @@ tests/unit, tests/integration, tests/e2e
   - V5: 제목은 공백 불가, 최대 200자
   - V6: 수정 결과도 V2·V3를 만족해야 하며, 위반 시 400으로 거절하고 아무것도 바꾸지 않는다. 자동 연결 해제는 하지 않는다.
 - V2·V3·V6 검사와 저장은 트랜잭션이 아니다(검사 후 쓰기). 데이터가 사용자별로 분리되어 있고 한 사용자의 동시 수정이 드물어 의도적으로 단순하게 두었다.
-- **인증과 데이터 분리**: `/api/*`는 `handle(request, fn)`이 세션을 확인하고 `runAsUser`로 감싼다. 할 일·주간 계획·1년 목표 모델은 `ownedByUser` 플러그인이 모든 쿼리·집계·저장에 `userId`를 붙이므로 서비스 코드는 사용자를 몰라도 된다. 사용자 컨텍스트 없이 이 모델을 쓰면 오류(fail closed). 컨텍스트 안에서 쿼리를 반환만 해도 `runAsUser`가 안에서 기다리므로 안전하다. 유지보수 스크립트만 `runUnscoped`를 쓴다. 사용자 컨텍스트 안에서는 `bulkWrite`, `estimatedDocumentCount`, `$lookup`/`$unionWith`/`$graphLookup` 집계, `userId`를 바꾸는 수정이 오류로 거부되므로 서비스에서 쓰지 않는다. 운영에서는 `APP_URL`이 필수다.
+- **인증과 데이터 분리**: `/api/*`는 `handle(request, fn)`이 세션을 확인하고 `runAsUser`로 감싼다. 할 일·주간 계획·1년 목표 모델은 `ownedByUser` 플러그인이 모든 쿼리·집계·저장에 `userId`를 붙이므로 서비스 코드는 사용자를 몰라도 된다. 사용자 컨텍스트 없이 이 모델을 쓰면 오류(fail closed). 컨텍스트 안에서 쿼리를 반환만 해도 `runAsUser`가 안에서 기다리므로 안전하다. 유지보수 스크립트만 `runUnscoped`를 쓴다. 사용자 컨텍스트 안에서는 `bulkWrite`, `estimatedDocumentCount`, `$lookup`/`$unionWith`/`$graphLookup` 집계, `userId`를 바꾸는 수정이 오류로 거부되므로 서비스에서 쓰지 않는다.
 - 화면은 `src/app/(app)/layout.tsx`가 세션이 없으면 `/login`으로 보낸다. 클라이언트는 API 401을 받으면 `Providers`의 전역 onError가 `/login`으로 이동시킨다.
 - **삭제**: 하위 항목이 있으면 `?mode=unlink|cascade`가 필요하다(없으면 409). 하위 항목부터 지우므로 중간 실패 후 다시 실행하면 이어서 완료된다.
 - **드래그 상태 변경**: 카드마다 `useMoveTodo(id)`(mutation `scope: todo-<id>`)를 쓴다. 같은 카드의 요청은 순서대로 전송되고 화면은 즉시 바뀐다. 실패하면 롤백과 토스트를 띄우고, 진행 중인 상태 변경이 모두 끝나면 서버 값으로 다시 맞춘다.

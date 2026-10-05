@@ -1,15 +1,8 @@
-import { expect, test } from "@playwright/test";
-import { card, closeDatabase, column, dragTo, openBoard, resetDatabase, seed } from "./helpers";
+import { expect, test } from "./fixtures";
+import { card, column, dragTo, openBoard, seed } from "./helpers";
 
 const MONDAY = "2026-10-05";
 
-test.beforeEach(async () => {
-  await resetDatabase();
-});
-
-test.afterAll(async () => {
-  await closeDatabase();
-});
 
 test("E5: linking an unlinked todo removes it from the list and grows the plan's denominator", async ({ page, request }) => {
   await seed.plan(request, { title: "연결 대상", weekStart: MONDAY });

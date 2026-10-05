@@ -1,12 +1,13 @@
-import { MongoMemoryReplSet } from "mongodb-memory-server";
+import { MongoMemoryServer } from "mongodb-memory-server";
 
-let replSet: MongoMemoryReplSet | undefined;
+let server: MongoMemoryServer | undefined;
 
+// A standalone server starts much faster than a replica set; the app uses no transactions.
 export async function setup() {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
-  process.env.TEST_MONGO_BASE_URI = replSet.getUri();
+  server = await MongoMemoryServer.create();
+  process.env.TEST_MONGO_BASE_URI = server.getUri();
 }
 
 export async function teardown() {
-  await replSet?.stop();
+  await server?.stop();
 }
