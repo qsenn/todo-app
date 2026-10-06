@@ -39,7 +39,7 @@ export function DeleteParentDialog({ kind, id, title, onClose }: Props) {
   const heading = kind === "goal" ? "1년 목표 삭제" : "주간 계획 삭제";
   return (
     <Modal title={heading} onClose={onClose}>
-      {impact.isPending && <p className="text-sm text-slate-500">연결된 항목을 확인하는 중…</p>}
+      {impact.isPending && <p className="text-sm text-muted">연결된 항목을 확인하는 중…</p>}
       <FormError error={impact.error ?? mutation.error} />
       {counts && childCount === 0 && (
         <>
@@ -59,7 +59,7 @@ export function DeleteParentDialog({ kind, id, title, onClose }: Props) {
             {kind === "goal" && <li>주간 계획 {counts.weeklyPlanCount}개</li>}
             <li>할 일 {counts.todoCount}개</li>
           </ul>
-          <p className="mb-4 text-xs text-slate-500">
+          <p className="mb-4 text-[13px] text-muted">
             연결만 해제하면 하위 항목은 남고 ‘미연결’ 상태가 됩니다. 하위 항목까지 삭제하면 되돌릴 수 없습니다.
           </p>
           <div className="flex flex-wrap justify-end gap-2">

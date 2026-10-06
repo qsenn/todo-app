@@ -10,13 +10,13 @@ import { ProgressBar } from "./ProgressBar";
 import { inputClass, labelClass } from "./ui";
 
 function TodoRows({ todos }: { todos: TodoDTO[] }) {
-  if (todos.length === 0) return <p className="py-1 text-xs text-slate-400">할 일 없음</p>;
+  if (todos.length === 0) return <p className="py-1 text-[13px] text-muted-soft">할 일 없음</p>;
   return (
     <ul className="space-y-1">
       {todos.map((todo) => (
         <li key={todo.id} className="flex justify-between gap-2 text-sm">
-          <span className={todo.status === "done" ? "text-slate-400 line-through" : ""}>{todo.title}</span>
-          <span className="shrink-0 text-xs text-slate-500">{todo.date} · {STATUS_LABELS[todo.status]}</span>
+          <span className={todo.status === "done" ? "text-muted-soft line-through" : ""}>{todo.title}</span>
+          <span className="shrink-0 text-[13px] text-muted">{todo.date} · {STATUS_LABELS[todo.status]}</span>
         </li>
       ))}
     </ul>
@@ -25,16 +25,16 @@ function TodoRows({ todos }: { todos: TodoDTO[] }) {
 
 function PlanNode({ plan }: { plan: HierarchyPlan }) {
   return (
-    <details className="rounded-md border border-slate-200 bg-white" data-testid="tree-plan">
+    <details className="rounded-md border border-hairline bg-canvas" data-testid="tree-plan">
       <summary className="cursor-pointer list-none px-3 py-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-medium">
-            ▸ {plan.title} <span className="text-xs font-normal text-slate-500">({formatWeek(plan.weekStart, plan.weekEnd)})</span>
+            ▸ {plan.title} <span className="text-[13px] font-normal text-muted">({formatWeek(plan.weekStart, plan.weekEnd)})</span>
           </span>
           <span className="w-48"><ProgressBar value={plan.progress} label={`${plan.title} 진행률`} /></span>
         </div>
       </summary>
-      <div className="border-t border-slate-100 px-3 py-2"><TodoRows todos={plan.todos} /></div>
+      <div className="border-t border-hairline-soft px-3 py-2"><TodoRows todos={plan.todos} /></div>
     </details>
   );
 }
@@ -53,7 +53,7 @@ export function HierarchyView({ today }: { today: string }) {
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end gap-3">
-        <h1 className="mr-auto text-xl font-semibold">계층 보기</h1>
+        <h1 className="mr-auto text-[28px] font-bold leading-[1.43] text-ink">계층 보기</h1>
         <div>
           <label className={labelClass} htmlFor="tree-year">연도</label>
           <input
@@ -68,15 +68,15 @@ export function HierarchyView({ today }: { today: string }) {
         </div>
       </header>
 
-      {tree.isPending && <p className="text-sm text-slate-500">불러오는 중…</p>}
+      {tree.isPending && <p className="text-sm text-muted">불러오는 중…</p>}
       {tree.isError && <FormError error={tree.error} />}
       {tree.data && (
         <>
-          {tree.data.goals.length === 0 && <p className="text-sm text-slate-500">{year}년 목표가 없습니다.</p>}
+          {tree.data.goals.length === 0 && <p className="text-sm text-muted">{year}년 목표가 없습니다.</p>}
           <ul className="space-y-3">
             {tree.data.goals.map((goal) => (
               <li key={goal.id}>
-                <details open className="rounded-lg border border-slate-300 bg-slate-100/60" data-testid="tree-goal">
+                <details open className="rounded-lg border border-hairline bg-surface-soft" data-testid="tree-goal">
                   <summary className="cursor-pointer list-none p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-semibold">{goal.title}</span>
@@ -84,7 +84,7 @@ export function HierarchyView({ today }: { today: string }) {
                     </div>
                   </summary>
                   <div className="space-y-2 px-3 pb-3">
-                    {goal.weeklyPlans.length === 0 && <p className="text-xs text-slate-500">연결된 주간 계획 없음</p>}
+                    {goal.weeklyPlans.length === 0 && <p className="text-[13px] text-muted">연결된 주간 계획 없음</p>}
                     {goal.weeklyPlans.map((plan) => <PlanNode key={plan.id} plan={plan} />)}
                   </div>
                 </details>
@@ -93,14 +93,14 @@ export function HierarchyView({ today }: { today: string }) {
           </ul>
 
           <section className="space-y-2" aria-label="목표 미연결 주간 계획">
-            <h2 className="text-sm font-semibold text-slate-700">목표에 연결되지 않은 주간 계획</h2>
-            {tree.data.unlinkedWeeklyPlans.length === 0 && <p className="text-xs text-slate-500">없음</p>}
+            <h2 className="text-xl font-semibold tracking-[-0.18px] text-ink">목표에 연결되지 않은 주간 계획</h2>
+            {tree.data.unlinkedWeeklyPlans.length === 0 && <p className="text-[13px] text-muted">없음</p>}
             {tree.data.unlinkedWeeklyPlans.map((plan) => <PlanNode key={plan.id} plan={plan} />)}
           </section>
 
           <section className="space-y-2" aria-label="주간 계획 미연결 할 일">
-            <h2 className="text-sm font-semibold text-slate-700">주간 계획에 연결되지 않은 할 일</h2>
-            <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+            <h2 className="text-xl font-semibold tracking-[-0.18px] text-ink">주간 계획에 연결되지 않은 할 일</h2>
+            <div className="rounded-md border border-hairline bg-canvas px-3 py-2">
               <TodoRows todos={tree.data.unlinkedTodos} />
             </div>
           </section>

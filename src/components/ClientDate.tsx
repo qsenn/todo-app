@@ -11,5 +11,5 @@ const subscribe = () => () => {};
  */
 export function ClientDate({ children }: { children: (today: string) => ReactNode }) {
   const value = useSyncExternalStore(subscribe, () => today(), () => null);
-  return value ? children(value) : <p className="text-sm text-slate-500">불러오는 중…</p>;
+  return value ? children(value) : <p className="text-sm text-muted">불러오는 중…</p>;
 }

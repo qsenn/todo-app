@@ -18,11 +18,11 @@ function UnlinkedRow({ todo, plans }: { todo: TodoDTO; plans: WeeklyPlanDTO[] })
   const update = useUpdateTodo();
 
   return (
-    <li className="rounded-lg border border-slate-200 bg-white p-4" aria-label={`미연결 할 일: ${todo.title}`}>
+    <li className="rounded-md border border-hairline bg-canvas p-5 transition-shadow hover:shadow-card" aria-label={`미연결 할 일: ${todo.title}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-medium">{todo.title}</p>
-          <p className="text-xs text-slate-500">{todo.date} · {STATUS_LABELS[todo.status]}</p>
+          <p className="text-[13px] text-muted">{todo.date} · {STATUS_LABELS[todo.status]}</p>
         </div>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -64,11 +64,11 @@ function UnlinkedPlanRow({ plan, goals }: { plan: WeeklyPlanDTO; goals: GoalDTO[
   const update = useUpdateWeeklyPlan();
 
   return (
-    <li className="rounded-lg border border-slate-200 bg-white p-4" aria-label={`미연결 주간 계획: ${plan.title}`}>
+    <li className="rounded-md border border-hairline bg-canvas p-5 transition-shadow hover:shadow-card" aria-label={`미연결 주간 계획: ${plan.title}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-48 flex-1">
           <p className="font-medium">{plan.title}</p>
-          <p className="mb-2 text-xs text-slate-500">
+          <p className="mb-2 text-[13px] text-muted">
             {formatWeek(plan.weekStart, plan.weekEnd)} · 완료 {plan.doneCount} / 전체 {plan.totalCount}
           </p>
           <ProgressBar value={plan.progress} label={`${plan.title} 진행률`} />
@@ -111,15 +111,15 @@ export function UnlinkedView() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-semibold">미연결 항목</h1>
+      <h1 className="text-[28px] font-bold leading-[1.43] text-ink">미연결 항목</h1>
       {error && <FormError error={error} />}
 
       <section className="space-y-3" aria-labelledby="unlinked-todos">
         <div>
-          <h2 id="unlinked-todos" className="font-semibold">주간 계획에 연결되지 않은 할 일</h2>
-          <p className="mt-1 text-sm text-slate-500">같은 주의 계획에만 연결할 수 있습니다.</p>
+          <h2 id="unlinked-todos" className="text-xl font-semibold tracking-[-0.18px] text-ink">주간 계획에 연결되지 않은 할 일</h2>
+          <p className="mt-1 text-sm text-muted">같은 주의 계획에만 연결할 수 있습니다.</p>
         </div>
-        {todos.data?.length === 0 && <p className="text-sm text-slate-500">모든 할 일이 주간 계획에 연결되어 있습니다.</p>}
+        {todos.data?.length === 0 && <p className="text-sm text-muted">모든 할 일이 주간 계획에 연결되어 있습니다.</p>}
         {todos.data && plans.data && (
           <ul className="space-y-3">
             {todos.data.map((todo) => <UnlinkedRow key={todo.id} todo={todo} plans={plans.data} />)}
@@ -129,11 +129,11 @@ export function UnlinkedView() {
 
       <section className="space-y-3" aria-labelledby="unlinked-plans">
         <div>
-          <h2 id="unlinked-plans" className="font-semibold">1년 목표에 연결되지 않은 주간 계획</h2>
-          <p className="mt-1 text-sm text-slate-500">주의 시작일이나 종료일과 같은 연도의 목표에만 연결할 수 있습니다.</p>
+          <h2 id="unlinked-plans" className="text-xl font-semibold tracking-[-0.18px] text-ink">1년 목표에 연결되지 않은 주간 계획</h2>
+          <p className="mt-1 text-sm text-muted">주의 시작일이나 종료일과 같은 연도의 목표에만 연결할 수 있습니다.</p>
         </div>
         {unlinkedPlans.data?.length === 0 && (
-          <p className="text-sm text-slate-500">모든 주간 계획이 1년 목표에 연결되어 있습니다.</p>
+          <p className="text-sm text-muted">모든 주간 계획이 1년 목표에 연결되어 있습니다.</p>
         )}
         {unlinkedPlans.data && goals.data && (
           <ul className="space-y-3">

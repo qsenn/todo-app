@@ -42,20 +42,20 @@ export function TodoCard({ todo, planTitle, onEdit, onDelete }: Props) {
       aria-label={`할 일: ${todo.title}`}
       data-testid="todo-card"
       style={transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined}
-      className={`cursor-grab touch-none rounded-md border border-slate-200 bg-white p-3 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 ${
-        isDragging ? "z-10 opacity-80 shadow-lg" : ""
+      className={`cursor-grab touch-none rounded-md border border-hairline bg-canvas p-4 transition-shadow hover:shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-ink ${
+        isDragging ? "z-10 opacity-90 shadow-card" : ""
       }`}
     >
-      <p className={`text-sm font-medium ${todo.status === "done" ? "text-slate-400 line-through" : ""}`}>{todo.title}</p>
+      <p className={`text-base font-semibold ${todo.status === "done" ? "text-muted-soft line-through" : "text-ink"}`}>{todo.title}</p>
       <div className="mt-2 flex items-center justify-between gap-2">
-        <span className="truncate text-xs text-slate-500">{planTitle ?? "미연결"}</span>
-        <span className="flex shrink-0 gap-2">
+        <span className="truncate text-sm text-muted">{planTitle ?? "미연결"}</span>
+        <span className="flex shrink-0 gap-3">
           <button type="button" className={linkButton} onPointerDown={stop} onKeyDown={stop} onClick={() => onEdit(todo)}>
             수정
           </button>
           <button
             type="button"
-            className={`${linkButton} hover:text-red-600`}
+            className={`${linkButton} hover:text-error`}
             onPointerDown={stop}
             onKeyDown={stop}
             onClick={() => onDelete(todo)}

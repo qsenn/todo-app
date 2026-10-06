@@ -64,5 +64,6 @@ tests/unit, tests/integration, tests/e2e
 - **삭제**: 하위 항목이 있으면 `?mode=unlink|cascade`가 필요하다(없으면 409). 하위 항목부터 지우므로 중간 실패 후 다시 실행하면 이어서 완료된다.
 - **드래그 상태 변경**: 카드마다 `useMoveTodo(id)`(mutation `scope: todo-<id>`)를 쓴다. 같은 카드의 요청은 순서대로 전송되고 화면은 즉시 바뀐다. 실패하면 롤백과 토스트를 띄우고, 진행 중인 상태 변경이 모두 끝나면 서버 값으로 다시 맞춘다.
 - **날짜**: `Date` 객체 대신 `YYYY-MM-DD` 문자열을 쓴다. "오늘"은 브라우저 시간대 기준이며 `ClientDate`로 하이드레이션 이후에 정한다.
+- **디자인**: `docs/DESIGN.md`를 따른다. 색·모서리·그림자·글꼴 토큰은 `src/app/globals.css`의 `@theme`에 있고(`bg-primary`, `text-ink`, `text-muted`, `border-hairline`, `rounded-sm/md/lg`, `shadow-card` 등), 버튼·입력 공통 클래스는 `src/components/ui.ts`에 있다. 강조색(`primary`, #ff385c)은 주요 버튼·진행률·선택 표시에만 아껴 쓰고, 삭제는 `error` 색을 쓴다. Tailwind 기본 색(slate, red 등)을 새로 쓰지 말고 토큰을 쓴다. 메뉴는 사용자 요청으로 왼쪽 사이드바이다(DESIGN.md의 상단 메뉴 대신).
 - Next.js 16이다. API를 쓰기 전에 `node_modules/next/dist/docs/`를 확인한다(Route Handler `params`는 Promise).
 - Mongoose 9: `findByIdAndUpdate`에는 `returnDocument: "after"`를 쓴다(`new: true`는 deprecated).

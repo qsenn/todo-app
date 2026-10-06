@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens from docs/DESIGN.md: white canvas, near-black ink, a single accent (Rausch),
+ * soft radii (8 / 14 / 20 / 32 px) and one shadow tier. Utilities read them as bg-primary,
+ * text-ink, border-hairline, rounded-md, shadow-card, and so on.
+ */
+@theme {
+  --color-primary: #ff385c;
+  --color-primary-active: #e00b41;
+  --color-primary-disabled: #ffd1da;
+  --color-error: #c13515;
+  --color-error-hover: #b32505;
+  --color-ink: #222222;
+  --color-body: #3f3f3f;
+  --color-muted: #6a6a6a;
+  --color-muted-soft: #929292;
+  --color-hairline: #dddddd;
+  --color-hairline-soft: #ebebeb;
+  --color-border-strong: #c1c1c1;
+  --color-canvas: #ffffff;
+  --color-surface-soft: #f7f7f7;
+  --color-surface-strong: #f2f2f2;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+
+  --shadow-card: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0, rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+
+  /* Inter is the documented substitute for Airbnb Cereal; Korean glyphs fall back to the system font. */
+  --font-sans: var(--font-inter), -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", Roboto,
+    "Helvetica Neue", sans-serif;
+}
+
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-canvas);
 }

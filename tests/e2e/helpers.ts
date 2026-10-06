@@ -99,11 +99,13 @@ export const card = (scope: Page | Locator, title: string) =>
 
 /** Drags a card onto a column with real pointer events (dnd-kit needs intermediate moves). */
 export async function dragTo(page: Page, source: Locator, target: Locator) {
+  // The board can sit below the fold; bring the card on screen and aim at the top of the target column.
+  await source.scrollIntoViewIfNeeded();
   const from = (await source.boundingBox())!;
   const to = (await target.boundingBox())!;
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
   await page.mouse.move(from.x + from.width / 2 + 10, from.y + from.height / 2, { steps: 5 });
-  await page.mouse.move(to.x + to.width / 2, to.y + 80, { steps: 15 });
+  await page.mouse.move(to.x + to.width / 2, Math.min(to.y + 80, page.viewportSize()!.height - 5), { steps: 15 });
   await page.mouse.up();
 }

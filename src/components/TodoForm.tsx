@@ -39,13 +39,23 @@ export function TodoForm({ initial, defaultDate, submitLabel, pending, error, on
     onSubmit({ title, date, weeklyPlanId: weeklyPlanId || null, status });
   }
 
+  // Adding sits in one row on wide screens so the board stays above the fold; editing (in a dialog) stacks.
+  const inline = !initial;
   return (
-    <form onSubmit={submit} className="space-y-3" aria-label={submitLabel}>
+    <form
+      onSubmit={submit}
+      aria-label={submitLabel}
+      className={
+        inline
+          ? "grid gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.5fr)_auto] lg:items-start"
+          : "space-y-3"
+      }
+    >
       <div>
         <label className={labelClass} htmlFor={`${id}-title`}>제목</label>
         <input id={`${id}-title`} className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={200} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className={inline ? "" : "grid grid-cols-2 gap-3"}>
         <div>
           <label className={labelClass} htmlFor={`${id}-date`}>날짜</label>
           <input id={`${id}-date`} type="date" className={inputClass} value={date} onChange={(e) => setDate(e.target.value)} required />
@@ -73,13 +83,15 @@ export function TodoForm({ initial, defaultDate, submitLabel, pending, error, on
           ))}
         </select>
         {linkedElsewhere && (
-          <p className="mt-1 text-xs text-amber-700">
+          <p className="mt-1 text-[13px] text-error">
             연결된 주간 계획의 기간 밖 날짜입니다. 이 주의 계획을 고르거나 연결을 해제하세요.
           </p>
         )}
       </div>
-      <FormError error={error} />
-      <div className="flex justify-end gap-2">
+      <div className={inline ? "lg:col-span-full lg:row-start-2" : ""}>
+        <FormError error={error} />
+      </div>
+      <div className={`flex justify-end gap-2 ${inline ? "lg:col-start-4 lg:row-start-1 lg:pt-[26px]" : ""}`}>
         {onCancel && (
           <button type="button" className={secondaryButton} onClick={onCancel}>취소</button>
         )}

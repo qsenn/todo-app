@@ -14,13 +14,13 @@ export function KanbanColumn({ status, count, children }: Props) {
       ref={setNodeRef}
       aria-label={`${STATUS_LABELS[status]} 컬럼`}
       data-testid={`column-${status}`}
-      className={`flex min-h-64 flex-col rounded-lg border p-3 transition-colors ${
-        isOver ? "border-slate-500 bg-slate-100" : "border-slate-200 bg-slate-100/60"
+      className={`flex min-h-64 flex-col rounded-lg border-2 bg-surface-soft p-3 transition-colors ${
+        isOver ? "border-ink" : "border-transparent"
       }`}
     >
-      <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
+      <h2 className="mb-3 flex items-center justify-between px-1 text-base font-semibold text-ink">
         {STATUS_LABELS[status]}
-        <span className="rounded-full bg-white px-2 py-0.5 text-xs text-slate-500">{count}</span>
+        <span className="rounded-full border border-hairline bg-canvas px-2.5 py-0.5 text-[13px] font-semibold text-ink">{count}</span>
       </h2>
       <ul className="flex flex-1 flex-col gap-2">{children}</ul>
     </section>

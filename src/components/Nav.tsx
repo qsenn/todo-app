@@ -17,9 +17,9 @@ export function Nav({ user }: { user: AuthUser }) {
   const pathname = usePathname();
   return (
     // Full-height left sidebar on md+; a wrapping top bar on narrow screens.
-    <nav className="flex shrink-0 flex-wrap items-center border-b border-slate-200 bg-white md:sticky md:top-0 md:h-screen md:w-48 md:flex-col md:flex-nowrap md:items-stretch md:border-b-0 md:border-r">
-      <p className="hidden px-4 pt-5 pb-3 text-base font-semibold md:block">할 일 앱</p>
-      <ul className="flex flex-1 flex-wrap gap-1 px-4 py-2 md:flex-none md:flex-col md:px-3">
+    <nav className="flex shrink-0 flex-wrap items-center border-b border-hairline bg-canvas md:sticky md:top-0 md:h-screen md:w-56 md:flex-col md:flex-nowrap md:items-stretch md:border-b-0 md:border-r">
+      <p className="hidden px-5 pt-6 pb-4 text-xl font-bold text-primary md:block">할 일 앱</p>
+      <ul className="flex flex-1 flex-wrap gap-1 px-4 py-2 md:flex-none md:flex-col md:gap-0.5 md:px-3">
         {LINKS.map(({ href, label }) => {
           const active = pathname === href;
           return (
@@ -27,8 +27,8 @@ export function Nav({ user }: { user: AuthUser }) {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`block rounded-md px-3 py-1.5 text-sm font-medium ${
-                  active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
+                className={`block border-b-2 px-3 py-2 text-base font-semibold md:border-b-0 md:border-l-2 ${
+                  active ? "border-ink text-ink" : "border-transparent text-muted hover:bg-surface-soft hover:text-ink"
                 }`}
               >
                 {label}
@@ -38,7 +38,7 @@ export function Nav({ user }: { user: AuthUser }) {
         })}
       </ul>
       <div
-        className="flex items-center gap-2 px-4 py-2 md:mt-auto md:border-t md:border-slate-100 md:py-4"
+        className="flex w-full items-center gap-2 border-t border-hairline-soft px-4 py-2 md:mt-auto md:py-4"
         aria-label="로그인한 사용자"
       >
         {user.avatarUrl && (
@@ -55,7 +55,7 @@ export function Nav({ user }: { user: AuthUser }) {
           {user.username}
         </span>
         <form action="/auth/logout" method="post">
-          <button type="submit" className="text-xs font-medium text-slate-500 hover:text-slate-900">
+          <button type="submit" className="text-sm font-medium text-ink underline-offset-4 hover:underline">
             로그아웃
           </button>
         </form>

@@ -25,7 +25,7 @@ import { ProgressBar } from "./ProgressBar";
 import { TodoCard } from "./TodoCard";
 import { TodoForm } from "./TodoForm";
 import { useToast } from "./Toast";
-import { dangerButton, inputClass, labelClass, secondaryButton } from "./ui";
+import { dangerButton, iconButton, inputClass, labelClass, secondaryButton } from "./ui";
 
 const ALL = "all";
 const UNLINKED = "unlinked";
@@ -77,16 +77,16 @@ export function Board({ initialDate }: { initialDate: string }) {
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end gap-3">
-        <h1 className="mr-auto text-xl font-semibold">할 일 보드</h1>
+        <h1 className="mr-auto text-[28px] font-bold leading-[1.43] text-ink">할 일 보드</h1>
         <div className="flex items-end gap-1">
-          <button type="button" className={secondaryButton} aria-label="이전 날" onClick={() => changeDate(addDays(date, -1))}>
+          <button type="button" className={iconButton} aria-label="이전 날" onClick={() => changeDate(addDays(date, -1))}>
             ‹
           </button>
           <div>
             <label className={labelClass} htmlFor="board-date">날짜</label>
             <input id="board-date" type="date" className={inputClass} value={date} onChange={(e) => changeDate(e.target.value)} />
           </div>
-          <button type="button" className={secondaryButton} aria-label="다음 날" onClick={() => changeDate(addDays(date, 1))}>
+          <button type="button" className={iconButton} aria-label="다음 날" onClick={() => changeDate(addDays(date, 1))}>
             ›
           </button>
         </div>
@@ -102,11 +102,11 @@ export function Board({ initialDate }: { initialDate: string }) {
         </div>
       </header>
 
-      <section className="rounded-lg border border-slate-200 bg-white p-4" aria-label="일일 진행률">
+      <section className="rounded-md border border-hairline bg-canvas p-6" aria-label="일일 진행률">
         <div className="mb-2 flex justify-between text-sm">
-          <span className="font-semibold text-slate-700">{date} 진행률</span>
+          <span className="font-semibold text-ink">{date} 진행률</span>
           {daily.data && (
-            <span className="text-slate-500" data-testid="daily-counts">
+            <span className="text-muted" data-testid="daily-counts">
               완료 {daily.data.doneCount} / 전체 {daily.data.totalCount}
             </span>
           )}
@@ -114,8 +114,8 @@ export function Board({ initialDate }: { initialDate: string }) {
         <ProgressBar value={daily.data?.progress ?? 0} label="일일 진행률" />
       </section>
 
-      <section className="rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">할 일 추가</h2>
+      <section className="rounded-md border border-hairline bg-canvas p-6">
+        <h2 className="mb-4 text-base font-semibold text-ink">할 일 추가</h2>
         <TodoForm
           key={`${date}-${formKey}`}
           defaultDate={date}
@@ -132,7 +132,7 @@ export function Board({ initialDate }: { initialDate: string }) {
       </section>
 
       {todos.isError && <FormError error={todos.error} />}
-      <p className="text-xs text-slate-500">
+      <p className="text-[13px] text-muted">
         카드를 끌어 다른 컬럼에 놓으면 상태가 바뀝니다. 키보드: 카드에서 Space → ←/→ → Space.
         {plans.data && plans.data.length > 0 && ` 이번 주: ${formatWeek(plans.data[0].weekStart, plans.data[0].weekEnd)}`}
       </p>
@@ -152,7 +152,7 @@ export function Board({ initialDate }: { initialDate: string }) {
                     onDelete={setDeleting}
                   />
                 ))}
-                {items.length === 0 && <li className="py-6 text-center text-xs text-slate-400">비어 있음</li>}
+                {items.length === 0 && <li className="py-6 text-center text-[13px] text-muted-soft">비어 있음</li>}
               </KanbanColumn>
             );
           })}

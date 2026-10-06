@@ -45,7 +45,7 @@ export function WeeklyPlanForm({ initial, defaultWeekStart, submitLabel, pending
         <div>
           <label className={labelClass} htmlFor={`${id}-week`}>주</label>
           <input id={`${id}-week`} type="date" className={inputClass} value={day} onChange={(e) => setDay(e.target.value)} required />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-[13px] text-muted">
             {weekStart ? `기간: ${formatWeek(weekStart, weekEnd(weekStart))}` : "아무 날짜나 고르면 그 주(월~일)로 맞춰집니다."}
           </p>
         </div>
